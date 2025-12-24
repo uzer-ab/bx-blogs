@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import Session from "../models/Session.js";
 
 export const verifyToken = (token) => {
   if (!token) {
@@ -12,8 +13,30 @@ export const verifyToken = (token) => {
   }
 };
 
-export const generateToken = async (userId, sessionId, expiresIn = "24h") => {
+export const generateToken = (userId, sessionId, expiresIn = "2h") => {
   return jwt.sign({ uid: userId, sid: sessionId }, process.env.JWT_SECRET, {
     expiresIn: expiresIn,
   });
+};
+
+export const createSession = async (
+  userId,
+  req,
+  timeInSeconds = 7 * 24 * 60 * 60 * 1000
+) => {
+  if (!userId) {
+    throw {
+      status: 400,
+      message: "Bad Request - Invalid userId for session creation",
+    };
+  }
+
+  const session = await Session.create({
+    userId,
+    userAgent: req.get("User-Agent"),
+    ip: req.ip,
+    expiresAt: new Date(Date.now() + timeInSeconds),
+  });
+
+  return session;
 };

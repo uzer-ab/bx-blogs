@@ -5,7 +5,7 @@ import { verifyToken } from "../utils/auth.js";
 export const protect = async (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token" });
+    res.unauthorized("No Token");
   }
 
   try {
@@ -22,12 +22,16 @@ export const protect = async (req, res, next) => {
     });
 
     if (!session) {
-      return res.status(401).json({ message: "Invalid session" });
+      res.error("Invalid session");
     }
 
-    req.user = await User.findById(uid).select("-password");
+    req.user = await User.findById(uid);
+    req.session = session;
+
+    console.log("DEBUG LOG: ", req.user);
     next();
   } catch (err) {
-    res.status(401).json({ message: "Unauthorized" });
+    console.log(`Invalid session: ${err.message}`);
+    res.unauthorized("Invalid session");
   }
 };
