@@ -88,3 +88,7 @@ export const logout = async (req, res) => {
 
   return res.noContent();
 };
+
+export const getCurrentUser = async (req, res) => {
+  return res.success({ user: req.user });
+};

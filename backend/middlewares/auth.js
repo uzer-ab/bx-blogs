@@ -22,7 +22,7 @@ export const protect = async (req, res, next) => {
     });
 
     if (!session) {
-      res.error("Invalid session");
+      return res.unauthorized("Invalid session");
     }
 
     req.user = await User.findById(uid);
@@ -31,6 +31,6 @@ export const protect = async (req, res, next) => {
     next();
   } catch (err) {
     console.log(`Invalid session: ${err.message}`);
-    res.unauthorized("Invalid session");
+    return res.unauthorized("Invalid session");
   }
 };
