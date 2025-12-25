@@ -14,5 +14,6 @@ export default defineConfig({
   },
   define: {
     __API_URL__: JSON.stringify(process.env.API_URL),
+    __MODE__: JSON.stringify(process.env.MODE),
   },
 });
