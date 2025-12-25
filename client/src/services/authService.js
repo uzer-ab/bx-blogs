@@ -2,6 +2,15 @@ import api from "./api";
 import { API_ENDPOINTS } from "../config/api";
 
 export const authService = {
+  async validateSession() {
+    const response = await api.get(API_ENDPOINTS.AUTH.VALIDATE_SESSION, {
+      skipAuthRedirect: true,
+    });
+    const { user } = response.data.data;
+    localStorage.setItem("user", JSON.stringify(user));
+    return { user };
+  },
+
   async login(email, password) {
     const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
       email,

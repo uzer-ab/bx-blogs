@@ -12,6 +12,19 @@ const initialState = {
   error: null,
 };
 
+export const validateSession = createAsyncThunk(
+  "auth/validateSession",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await authService.validateSession();
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Invalid Session"
+      );
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
@@ -50,6 +63,21 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Validate Session
+      .addCase(validateSession.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(validateSession.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+      })
+      .addCase(validateSession.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+      })
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
