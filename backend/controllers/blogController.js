@@ -54,7 +54,7 @@ export const getBlogById = async (req, res) => {
       return res.notFound("Blog Post not Found!");
     }
 
-    return res.success({ blog: blogPost });
+    return res.success(blogPost);
   } catch (error) {
     console.error(error);
     return res.internalServerError(
@@ -70,20 +70,30 @@ export const fetchAllBlogs = async (req, res) => {
     const skip = (page - 1) * size;
     const limit = size;
 
-    const blogs = await Blog.find({ deleted: false })
+    const filter = { deleted: false };
+
+    if (req.isUserRoute) {
+      filter.author = req.user._id;
+    }
+
+    const blogs = await Blog.find(filter)
       .populate("author", "_id name email")
       .skip(skip)
       .limit(limit);
-    const total = await Blog.countDocuments({ deleted: false });
+
+    const total = await Blog.countDocuments(filter);
     const hasNext = page * size < total;
 
     const data = {
       blogs,
-      hasNext,
-      total,
+      paggination: {
+        total,
+        hasNext,
+        page,
+      },
     };
 
-    return res.success({ data });
+    return res.success(data);
   } catch (error) {
     console.error(error);
     return res.internalServerError("Error fetching blogs.");

@@ -1,5 +1,7 @@
 import express from "express";
 import { protect } from "../middlewares/auth.js";
+import { markAsUserRoute } from "../middlewares/common.js";
+
 import {
   getBlogById,
   postBlog,
@@ -12,6 +14,8 @@ import { blogExists } from "../middlewares/blogs.js";
 const router = express.Router();
 
 router.get("/", fetchAllBlogs);
+
+router.get("/user", protect, markAsUserRoute, fetchAllBlogs);
 
 router.get("/:id", blogExists, getBlogById);
 
