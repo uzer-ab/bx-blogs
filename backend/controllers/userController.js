@@ -1,9 +1,24 @@
 import Session from "../models/Session.js";
 import User from "../models/User.js";
 import { createSession, generateToken } from "../utils/auth.js";
+import validator from "validator";
+
+const { isEmail } = validator;
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
+
+  if (!isEmail(email)) {
+    return res.error("Invalid email format");
+  }
+
+  if (name.length < 3) {
+    return res.error("Name must be at least 3 characters long");
+  }
+
+  if (password.length < 5) {
+    return res.error("Password must be at least 5 characters long");
+  }
 
   const userExists = await User.findOne({ email }).select("_id").lean();
   if (userExists) {
@@ -26,6 +41,14 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+
+  if (!isEmail(email)) {
+    return res.error("Invalid email format");
+  }
+
+  if (password.length < 5) {
+    return res.error("Password must be at least 5 characters long");
+  }
 
   if (!!email && !!password) {
     try {
