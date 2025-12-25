@@ -12,13 +12,13 @@ import Box from "@mui/material/Box";
 import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import { toast } from "sonner";
+import { validateRegisterForm } from "@/utils/validation";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [validationError, setValidationError] = useState("");
+  const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector(
@@ -39,15 +39,11 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError("");
 
-    if (password !== confirmPassword) {
-      setValidationError("Passwords do not match");
-      return;
-    }
+    const validationErrors = validateRegisterForm({ name, email, password });
 
-    if (password.length < 5) {
-      setValidationError("Password must be at least 5 characters");
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -55,6 +51,27 @@ const Register = () => {
     if (!result.error) {
       toast.success("Registration successful! Please login.");
       navigate("/login");
+    }
+  };
+
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+    if (errors.name) {
+      setErrors({ ...errors, name: "" });
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (errors.email) {
+      setErrors({ ...errors, email: "" });
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors({ ...errors, password: "" });
     }
   };
 
@@ -78,7 +95,7 @@ const Register = () => {
 
           <form onSubmit={handleSubmit}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <ErrorMessage message={error || validationError} />
+              <ErrorMessage message={error} />
 
               <TextField
                 id="name"
@@ -86,7 +103,9 @@ const Register = () => {
                 type="text"
                 placeholder="John Doe"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
+                error={!!errors.name}
+                helperText={errors.name}
                 required
                 fullWidth
               />
@@ -97,7 +116,9 @@ const Register = () => {
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
+                error={!!errors.email}
+                helperText={errors.email}
                 required
                 fullWidth
               />
@@ -108,18 +129,9 @@ const Register = () => {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                fullWidth
-              />
-
-              <TextField
-                id="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={handlePasswordChange}
+                error={!!errors.password}
+                helperText={errors.password}
                 required
                 fullWidth
               />
