@@ -8,8 +8,13 @@ const initialState = {
   loading: false,
   error: null,
   pagination: {
+    hasNext: false,
     page: 1,
-    size: 10,
+    total: 0,
+  },
+  userBlogsPagination: {
+    hasNext: false,
+    page: 1,
     total: 0,
   },
 };
@@ -103,6 +108,22 @@ const blogSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    resetBlogs: (state) => {
+      state.blogs = [];
+      state.pagination = {
+        hasNext: false,
+        page: 1,
+        total: 0,
+      };
+    },
+    resetUserBlogs: (state) => {
+      state.userBlogs = [];
+      state.userBlogsPagination = {
+        hasNext: false,
+        page: 1,
+        total: 0,
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -113,9 +134,13 @@ const blogSlice = createSlice({
       })
       .addCase(fetchBlogs.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogs = action.payload.data.blogs || action.payload;
-        if (action.payload.pagination) {
-          state.pagination = action.payload.pagination;
+        const newBlogs = action.payload.data.blogs || action.payload;
+
+        // Append new blogs instead of replacing
+        state.blogs = [...state.blogs, ...newBlogs];
+
+        if (action.payload.data.pagination) {
+          state.pagination = action.payload.data.pagination;
         }
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
@@ -129,9 +154,13 @@ const blogSlice = createSlice({
       })
       .addCase(fetchUserBlogs.fulfilled, (state, action) => {
         state.loading = false;
-        state.userBlogs = action.payload.data.blogs || action.payload;
-        if (action.payload.pagination) {
-          state.pagination = action.payload.pagination;
+        const newBlogs = action.payload.data.blogs || action.payload;
+
+        // Append new user blogs instead of replacing
+        state.userBlogs = [...state.userBlogs, ...newBlogs];
+
+        if (action.payload.data.pagination) {
+          state.userBlogsPagination = action.payload.data.pagination;
         }
       })
       .addCase(fetchUserBlogs.rejected, (state, action) => {
@@ -160,6 +189,7 @@ const blogSlice = createSlice({
         state.loading = false;
         const newBlog = action.payload.data || action.payload;
         state.blogs.unshift(newBlog);
+        state.userBlogs.unshift(newBlog);
       })
       .addCase(createBlog.rejected, (state, action) => {
         state.loading = false;
@@ -173,12 +203,23 @@ const blogSlice = createSlice({
       .addCase(updateBlog.fulfilled, (state, action) => {
         state.loading = false;
         const updatedBlog = action.payload.data || action.payload;
-        const index = state.blogs.findIndex(
+
+        // Update in blogs array
+        const blogIndex = state.blogs.findIndex(
           (blog) => blog._id === updatedBlog._id
         );
-        if (index !== -1) {
-          state.blogs[index] = updatedBlog;
+        if (blogIndex !== -1) {
+          state.blogs[blogIndex] = updatedBlog;
         }
+
+        // Update in userBlogs array
+        const userBlogIndex = state.userBlogs.findIndex(
+          (blog) => blog._id === updatedBlog._id
+        );
+        if (userBlogIndex !== -1) {
+          state.userBlogs[userBlogIndex] = updatedBlog;
+        }
+
         state.currentBlog = updatedBlog;
       })
       .addCase(updateBlog.rejected, (state, action) => {
@@ -193,6 +234,9 @@ const blogSlice = createSlice({
       .addCase(deleteBlog.fulfilled, (state, action) => {
         state.loading = false;
         state.blogs = state.blogs.filter((blog) => blog._id !== action.payload);
+        state.userBlogs = state.userBlogs.filter(
+          (blog) => blog._id !== action.payload
+        );
       })
       .addCase(deleteBlog.rejected, (state, action) => {
         state.loading = false;
@@ -201,5 +245,6 @@ const blogSlice = createSlice({
   },
 });
 
-export const { clearCurrentBlog, clearError } = blogSlice.actions;
+export const { clearCurrentBlog, clearError, resetBlogs, resetUserBlogs } =
+  blogSlice.actions;
 export default blogSlice.reducer;

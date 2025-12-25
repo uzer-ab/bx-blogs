@@ -86,7 +86,7 @@ export const fetchAllBlogs = async (req, res) => {
 
     const data = {
       blogs,
-      paggination: {
+      pagination: {
         total,
         hasNext,
         page,

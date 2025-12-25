@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserBlogs, deleteBlog } from "@/store/slices/blogSlice";
+import {
+  fetchUserBlogs,
+  deleteBlog,
+  resetUserBlogs,
+} from "@/store/slices/blogSlice";
 import BlogCard from "@/components/blog/BlogCard";
 import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
@@ -21,23 +25,58 @@ import { toast } from "sonner";
 const MyBlogs = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { userBlogs, loading, error } = useSelector((state) => state.blogs);
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { userBlogs, loading, error, userBlogsPagination } = useSelector(
+    (state) => state.blogs
+  );
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [deleteId, setDeleteId] = useState(null);
 
-  useEffect(() => {
-    dispatch(fetchUserBlogs({ page: 1, size: 10 }));
-  }, [dispatch]);
+  const observerTarget = useRef(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-    dispatch(fetchUserBlogs({ page: 1, size: 100 }));
+
+    dispatch(resetUserBlogs());
+    dispatch(fetchUserBlogs({ page: 1, size: 10 }));
   }, [dispatch, isAuthenticated, navigate]);
 
-  const myBlogs = userBlogs.filter((blog) => blog.author?._id === user?._id);
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          userBlogsPagination.hasNext &&
+          !loading
+        ) {
+          dispatch(
+            fetchUserBlogs({ page: userBlogsPagination.page + 1, size: 10 })
+          );
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const currentTarget = observerTarget.current;
+
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [
+    userBlogsPagination.hasNext,
+    userBlogsPagination.page,
+    loading,
+    dispatch,
+  ]);
 
   const handleEdit = (id) => {
     navigate(`/blogs/edit/${id}`);
@@ -104,7 +143,7 @@ const MyBlogs = () => {
 
       <ErrorMessage message={error} sx={{ mb: 2 }} />
 
-      {myBlogs.length === 0 && !loading ? (
+      {userBlogs.length === 0 && !loading ? (
         <Box sx={{ textAlign: "center", py: 6 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
             You haven't written any blogs yet.
@@ -119,18 +158,41 @@ const MyBlogs = () => {
           </Button>
         </Box>
       ) : (
-        <Grid container spacing={3}>
-          {myBlogs.map((blog) => (
-            <Grid item xs={12} md={6} lg={4} key={blog._id}>
-              <BlogCard
-                blog={blog}
-                isOwner={true}
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Grid container spacing={3}>
+            {userBlogs.map((blog) => (
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={blog._id}>
+                <BlogCard
+                  blog={blog}
+                  isOwner={true}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {userBlogsPagination.hasNext && (
+            <Box
+              ref={observerTarget}
+              sx={{
+                height: "100px",
+                mt: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {loading && <Spinner size="small" />}
+            </Box>
+          )}
+
+          {loading && !userBlogsPagination.hasNext && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <Spinner size="small" />
+            </Box>
+          )}
+        </>
       )}
 
       <Dialog

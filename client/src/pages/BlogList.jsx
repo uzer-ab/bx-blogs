@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs } from "@/store/slices/blogSlice";
+import { fetchBlogs, resetBlogs } from "@/store/slices/blogSlice";
 import BlogCard from "@/components/blog/BlogCard";
 import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
-import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -16,13 +15,36 @@ const BlogList = () => {
     (state) => state.blogs
   );
 
+  const observerTarget = useRef(null);
+
   useEffect(() => {
+    dispatch(resetBlogs());
     dispatch(fetchBlogs({ page: 1, size: 10 }));
   }, [dispatch]);
 
-  const handleLoadMore = () => {
-    dispatch(fetchBlogs({ page: pagination.page + 1, size: pagination.size }));
-  };
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && pagination.hasNext && !loading) {
+          dispatch(fetchBlogs({ page: pagination.page + 1, size: 10 }));
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const currentTarget = observerTarget.current;
+
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [pagination.hasNext, pagination.page, loading, dispatch]);
 
   if (loading && blogs.length === 0) {
     return (
@@ -69,15 +91,25 @@ const BlogList = () => {
             ))}
           </Grid>
 
-          {pagination.hasMore && (
+          {/* Observer target element - triggers loading when visible */}
+          {pagination.hasNext && (
+            <Box
+              ref={observerTarget}
+              sx={{
+                height: "100px",
+                mt: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {loading && <Spinner size="small" />}
+            </Box>
+          )}
+
+          {loading && !pagination.hasNext && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <Button
-                variant="contained"
-                onClick={handleLoadMore}
-                disabled={loading}
-              >
-                {loading ? <Spinner size="small" /> : "Load More"}
-              </Button>
+              <Spinner size="small" />
             </Box>
           )}
         </>
