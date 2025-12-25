@@ -9,7 +9,7 @@ import {
   deleteBlog,
   updateBlog,
 } from "../controllers/blogController.js";
-import { blogExists } from "../middlewares/blogs.js";
+import { blogExists, isBlogBelongToUser } from "../middlewares/blogs.js";
 
 const router = express.Router();
 
@@ -21,8 +21,8 @@ router.get("/:id", blogExists, getBlogById);
 
 router.post("/", protect, postBlog);
 
-router.put("/:id", protect, blogExists, updateBlog);
+router.put("/:id", protect, isBlogBelongToUser, updateBlog);
 
-router.delete("/:id", protect, blogExists, deleteBlog);
+router.delete("/:id", protect, isBlogBelongToUser, deleteBlog);
 
 export default router;

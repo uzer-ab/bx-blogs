@@ -24,6 +24,8 @@ const blogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+blogSchema.index({ deleted: 1, author: 1 });
+
 const Blog = mongoose.model("Blog", blogSchema);
 
 export default Blog;

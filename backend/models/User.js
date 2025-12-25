@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Provide an email"],
       trim: true,
       unique: true,
+      lowercase: true,
     },
     password: {
       type: String,
@@ -27,6 +28,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ is_active: 1 });
+
 // Exclude password
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
@@ -34,7 +38,7 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
-// pre save
+// hash password before saving
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) {
     return;
@@ -43,7 +47,6 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method
 userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
