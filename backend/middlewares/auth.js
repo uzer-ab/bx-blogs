@@ -28,7 +28,6 @@ export const protect = async (req, res, next) => {
     req.user = await User.findById(uid);
     req.session = session;
 
-    console.log("DEBUG LOG: ", req.user);
     next();
   } catch (err) {
     console.log(`Invalid session: ${err.message}`);

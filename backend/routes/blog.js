@@ -1,22 +1,24 @@
 import express from "express";
 import { protect } from "../middlewares/auth.js";
+import {
+  getBlogById,
+  postBlog,
+  fetchAllBlogs,
+  deleteBlog,
+  updateBlog,
+} from "../controllers/blogController.js";
+import { blogExists } from "../middlewares/blogs.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  return res.send({ message: "POSTS ROUTE" });
-});
+router.get("/", fetchAllBlogs);
 
-router.get("/:id", async (req, res) => {
-  return res.send({ message: "POST ROUTE" });
-});
+router.get("/:id", blogExists, getBlogById);
 
-router.post("/", protect, async (req, res) => {
-  return res.send({ message: "POST CREATE ROUTE" });
-});
+router.post("/", protect, postBlog);
 
-router.delete("/:id", protect, async (req, res) => {
-  return res.send({ message: "DELETE ROUTE" });
-});
+router.put("/:id", protect, blogExists, updateBlog);
+
+router.delete("/:id", protect, blogExists, deleteBlog);
 
 export default router;

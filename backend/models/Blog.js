@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const blogSchema = new mongoose.Schema(
   {
-    titile: {
+    title: {
       type: String,
       required: true,
     },
@@ -10,10 +10,15 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    authorId: {
+    author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+      select: false,
     },
   },
   { timestamps: true }

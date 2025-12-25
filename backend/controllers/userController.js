@@ -10,13 +10,18 @@ export const register = async (req, res) => {
     return res.forbidden("User with the email already exists!");
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
+  try {
+    const user = await User.create({
+      name,
+      email,
+      password,
+    });
 
-  res.created(user, "User Created!");
+    res.created(user, "User Created!");
+  } catch (err) {
+    console.log(`Something went wrong, please try again. ${err}`);
+    return res.internalServerError("Something went wrong, please try again.");
+  }
 };
 
 export const login = async (req, res) => {
@@ -41,7 +46,7 @@ export const login = async (req, res) => {
       return res.success({ token, user }, "Login Successful");
     } catch (err) {
       console.log(`Something went wrong, please try again. ${err}`);
-      return res.error("Something went wrong, please try again.");
+      return res.internalServerError("Something went wrong, please try again.");
     }
   }
 

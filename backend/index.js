@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(responseFormatter);
 
 app.use("/api/v1/auth", authRouter);
-app.use("apip/v1/blogs", blogRouter);
+app.use("/api/v1/blogs", blogRouter);
 
 app.use("/api/v1", (req, res) => {
   res.send({ message: "Server is Running!" });
