@@ -21,6 +21,7 @@ import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { validateBlogForm } from "@/utils/validation";
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -33,7 +34,7 @@ const BlogEditor = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [validationError, setValidationError] = useState("");
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -52,7 +53,6 @@ const BlogEditor = () => {
 
   useEffect(() => {
     if (isEditing && currentBlog) {
-      // Check if user is the owner
       if (currentBlog.author?._id !== user?._id) {
         toast.error("You can only edit your own blogs");
         navigate("/");
@@ -98,15 +98,12 @@ const BlogEditor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError("");
 
-    if (!title.trim()) {
-      setValidationError("Title is required");
-      return;
-    }
+    const validationErrors = validateBlogForm({ title, content });
 
-    if (!content.trim() || content === "<p><br></p>") {
-      setValidationError("Content is required");
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -122,6 +119,20 @@ const BlogEditor = () => {
         isEditing ? "Blog updated successfully!" : "Blog created successfully!"
       );
       navigate("/my-blogs");
+    }
+  };
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+    if (errors.title) {
+      setErrors({ ...errors, title: "" });
+    }
+  };
+
+  const handleContentChange = (value) => {
+    setContent(value);
+    if (errors.content) {
+      setErrors({ ...errors, content: "" });
     }
   };
 
@@ -164,25 +175,28 @@ const BlogEditor = () => {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <ErrorMessage message={error || validationError} />
+              <ErrorMessage message={error} />
 
               <TextField
                 id="title"
                 label="Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={handleTitleChange}
                 placeholder="Enter blog title..."
+                error={!!errors.title}
+                helperText={errors.title}
                 required
                 fullWidth
               />
 
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!errors.content}>
                 <InputLabel
                   shrink
                   htmlFor="content-editor"
                   sx={{ bgcolor: "background.paper", px: 1 }}
+                  error={!!errors.content}
                 >
-                  Content
+                  Content *
                 </InputLabel>
                 <Box
                   id="content-editor"
@@ -190,7 +204,7 @@ const BlogEditor = () => {
                     minHeight: "300px",
                     mt: 2,
                     border: "1px solid",
-                    borderColor: "divider",
+                    borderColor: errors.content ? "error.main" : "divider",
                     borderRadius: 1,
                     "& .quill": {
                       height: "250px",
@@ -200,12 +214,21 @@ const BlogEditor = () => {
                   <ReactQuill
                     theme="snow"
                     value={content}
-                    onChange={setContent}
+                    onChange={handleContentChange}
                     modules={modules}
                     formats={formats}
                     placeholder="Write your blog content..."
                   />
                 </Box>
+                {errors.content && (
+                  <Typography
+                    variant="caption"
+                    color="error"
+                    sx={{ mt: 0.5, ml: 1.75 }}
+                  >
+                    {errors.content}
+                  </Typography>
+                )}
               </FormControl>
             </Box>
 

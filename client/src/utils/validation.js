@@ -42,3 +42,32 @@ export const validateRegisterForm = ({ name, email, password }) => {
 
   return errors;
 };
+
+// Blog validation
+export const validateBlogTitle = (title) => {
+  if (!title || !title.trim()) {
+    return "Title is required";
+  }
+  return "";
+};
+
+export const validateBlogContent = (content) => {
+  const strippedContent = content.replace(/<[^>]*>/g, "").trim();
+
+  if (!content || !strippedContent || content === "<p><br></p>") {
+    return "Content is required";
+  }
+  return "";
+};
+
+export const validateBlogForm = ({ title, content }) => {
+  const errors = {};
+
+  const titleError = validateBlogTitle(title);
+  if (titleError) errors.title = titleError;
+
+  const contentError = validateBlogContent(content);
+  if (contentError) errors.content = contentError;
+
+  return errors;
+};
