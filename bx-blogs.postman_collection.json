@@ -1,0 +1,388 @@
+{
+	"info": {
+		"_postman_id": "c4f1dd57-2e75-400e-b0c9-698a63a34a36",
+		"name": "bx-blogs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29235208"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"uzair\",\n    \"email\": \"uzair@example.com\",\n    \"password\": \"12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/auth/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"register"
+					]
+				},
+				"description": "## Register User\n\nThis endpoint is used to register a new user in the system. It accepts user information and creates a new account.\n\n### Request\n\n- **Method**: POST\n    \n- **URL**: `http://127.0.0.1:1234/api/v1/auth/register`\n    \n\n#### Request Body\n\nThe request body must be sent in JSON format. It should contain the necessary user details for registration. The expected structure of the request body is as follows:\n\n``` json\n{\n  \"username\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}\n\n ```\n\n- `username`: The desired username for the new account.\n    \n- `email`: The email address of the user.\n    \n- `password`: The password for the account.\n    \n\n### Response\n\nUpon successful registration, the API will return a response indicating the success of the operation. The expected structure of the response is as follows:\n\n``` json\n{\n  \"success\": true,\n  \"message\": \"User registered successfully.\",\n  \"userId\": \"string\"\n}\n\n ```\n\n- `success`: A boolean indicating whether the registration was successful.\n    \n- `message`: A message detailing the result of the registration attempt.\n    \n- `userId`: The unique identifier assigned to the newly registered user.\n    \n\n### Notes\n\n- Ensure that all required fields are provided in the request body.\n    \n- The email must be unique and in a valid format."
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json().data;",
+							"pm.expect(data).to.exist;",
+							"pm.expect(data).to.have.property('token').that.is.a('string');",
+							"pm.environment.set(\"auth_token\", data.token);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"uzair@example.com\",\n    \"password\": \"12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/auth/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/auth/logout",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post blog",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const data = pm.response.json().data;",
+							"pm.expect(data).to.exist;",
+							"",
+							"const blog = data.blog;",
+							"pm.expect(blog).to.exist;",
+							"",
+							"pm.expect(blog).to.have.property('_id');",
+							"pm.environment.set(\"new_blog_id\", blog._id);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"New Demo blog\",\n    \"content\": \"<p>This is test new blog</p>\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "blogById",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs/{{new_blog_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs",
+						"{{new_blog_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchAllBlogs",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs?page=1&size=10",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchUserAllBlogs",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs/user?page=1&size=10",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs",
+						"user"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteBlog",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs/{{new_blog_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs",
+						"{{new_blog_id}}"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "Bearer {{auth_token}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateBlog",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Demo blog updated\",\n    \"content\": \"This is test blog old\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:1234/api/v1/blogs/{{new_blog_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "1234",
+					"path": [
+						"api",
+						"v1",
+						"blogs",
+						"{{new_blog_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
