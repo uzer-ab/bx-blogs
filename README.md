@@ -1,6 +1,10 @@
 # BlogHub - Full Stack Blog Application
 
-A modern, full-stack blog platform built with React, Redux, Node.js, Express, and MongoDB. Features include user authentication with JWT sessions, rich text editing with Quill, and a responsive Material-UI design.
+A full-stack blog platform built with React, Redux, Node.js, Express, and MongoDB. Features include user authentication with JWT sessions, rich text editing with Quill, and Material-UI design.
+
+### Live at:
+
+`https://uzzair/online`
 
 ## 🚀 Features
 
