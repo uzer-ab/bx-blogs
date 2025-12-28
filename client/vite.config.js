@@ -17,37 +17,17 @@ export default defineConfig(({ mode }) => {
 
     define: {
       __API_URL__: JSON.stringify(env.API_URL),
-      __MODE__: JSON.stringify(mode),
+      __MODE__: JSON.stringify(env.MODE),
     },
 
     build: {
       rollupOptions: {
         output: {
-          manualChunks(id) {
-            if (id.includes("node_modules")) {
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "react-vendor";
-              }
-              if (id.includes("quill") || id.includes("react-quill")) {
-                return "quill-vendor";
-              }
-              if (id.includes("lodash")) {
-                return "utils-vendor";
-              }
-              if (id.includes("@mui") || id.includes("@emotion")) {
-                return "ui-vendor";
-              }
-              if (id.includes("redux") || id.includes("@reduxjs")) {
-                return "state-vendor";
-              }
-              if (id.includes("react-router")) {
-                return "router-vendor";
-              }
-              if (id.includes("lucide-react")) {
-                return "lucide-vendor";
-              }
-              return "vendor";
-            }
+          manualChunks: {
+            "react-vendor": ["react", "react-dom", "react-router-dom"],
+            "ui-vendor": ["@mui/material", "@emotion/react", "@emotion/styled"],
+            "state-vendor": ["react-redux", "@reduxjs/toolkit"],
+            "quill-vendor": ["react-quill-new", "quill"],
           },
         },
       },
