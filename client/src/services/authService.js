@@ -12,10 +12,16 @@ export const authService = {
   },
 
   async login(email, password) {
-    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
-      email,
-      password,
-    });
+    const response = await api.post(
+      API_ENDPOINTS.AUTH.LOGIN,
+      {
+        email,
+        password,
+      },
+      {
+        skipAuthRedirect: true,
+      }
+    );
     const { token, user } = response.data.data;
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));

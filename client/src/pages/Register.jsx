@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { register, clearError } from "@/store/slices/authSlice";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { validateRegisterForm } from "@/utils/validation";
 
 const Register = () => {
+  const location = useLocation();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,11 +27,12 @@ const Register = () => {
     (state) => state.auth
   );
 
+  const from = location.state?.from || "/";
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   useEffect(() => {
     return () => {
@@ -50,7 +53,7 @@ const Register = () => {
     const result = await dispatch(register({ name, email, password }));
     if (!result.error) {
       toast.success("Registration successful! Please login.");
-      navigate("/login");
+      navigate("/login", { state: { from: from } });
     }
   };
 
@@ -154,7 +157,11 @@ const Register = () => {
                 textAlign="center"
               >
                 Already have an account?{" "}
-                <Link to="/login" style={{ color: "inherit", fontWeight: 500 }}>
+                <Link
+                  to="/login"
+                  state={{ from: from }}
+                  style={{ color: "inherit", fontWeight: 500 }}
+                >
                   Sign in
                 </Link>
               </Typography>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { login, clearError } from "@/store/slices/authSlice";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -13,6 +13,8 @@ import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
 
 const Login = () => {
+  const location = useLocation();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
@@ -21,11 +23,12 @@ const Login = () => {
     (state) => state.auth
   );
 
+  const from = location.state?.from || "/";
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   useEffect(() => {
     return () => {
@@ -37,7 +40,7 @@ const Login = () => {
     e.preventDefault();
     const result = await dispatch(login({ email, password }));
     if (!result.error) {
-      navigate("/");
+      navigate(from, { replace: true });
     }
   };
 
@@ -106,6 +109,7 @@ const Login = () => {
                 <Link
                   to="/register"
                   style={{ color: "inherit", fontWeight: 500 }}
+                  state={{ from }}
                 >
                   Sign up
                 </Link>

@@ -8,6 +8,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import { Link, Navigate } from "react-router-dom";
 
 const BlogList = () => {
   const dispatch = useDispatch();
@@ -78,7 +79,14 @@ const BlogList = () => {
       {blogs.length === 0 && !loading ? (
         <Box sx={{ textAlign: "center", py: 6 }}>
           <Typography variant="h6" color="text.secondary">
-            No blogs found. Be the first to write one!
+            No blogs found. Be the first to&nbsp;
+            <Link
+              to="/blogs/new"
+              style={{ color: "#1976d2", textDecoration: "underline" }}
+            >
+              write
+            </Link>
+            &nbsp;one!
           </Typography>
         </Box>
       ) : (
