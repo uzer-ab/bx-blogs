@@ -1,4 +1,4 @@
-# BlogHub - Full Stack Blog Application
+# BX-Blogs - Full Stack Blog Application
 
 A full-stack blog platform built with React, Redux, Node.js, Express, and MongoDB. Features include user authentication with JWT sessions, rich text editing with Quill, and Material-UI design.
 
